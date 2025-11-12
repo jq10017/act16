@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
-
+import 'profile_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -177,23 +177,35 @@ class _EmailPasswordFormState extends State<EmailPasswordForm> {
   String _userEmail ='';
 
   void _signInWithEmailAndPassword() async {
-    try {
-      await widget.auth.signInWithEmailAndPassword(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
+  try {
+    final credential = await widget.auth.signInWithEmailAndPassword(
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
+
+    final user = credential.user;
+    if (user != null) {
       setState(() {
         _success = true;
-        _userEmail = _emailController.text;
+        _userEmail = user.email ?? '';
         _initialState = false;
       });
-    } catch (e) {
-      setState(() {
-        _success = false;
-        _initialState = false;
-      });
+
+      // Navigate to Profile Screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProfileScreen(user: user),
+        ),
+      );
     }
+  } catch (e) {
+    setState(() {
+      _success = false;
+      _initialState = false;
+    });
   }
+}
 
   @override
   Widget build(BuildContext context) {
